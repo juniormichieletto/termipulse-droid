@@ -26,7 +26,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
 
       - name: Build APKs
-        run: ./gradlew assembleDebug assembleRelease
+        run: gradle assembleDebug assembleRelease
 
       - name: Run JReleaser
         uses: jreleaser/release-action@v2
