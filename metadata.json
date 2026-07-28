@@ -1,5 +1,5 @@
 {
-  "name": "TermiPulse SSH Terminal",
+  "name": "termipulse-droid",
   "description": "Android SSH client & terminal emulator with multi-tab support, key bar, persistent background jobs, and host profile manager.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]

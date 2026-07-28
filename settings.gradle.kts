@@ -22,6 +22,6 @@ dependencyResolutionManagement {
   }
 }
 
-rootProject.name = "TermiPulse Terminal"
+rootProject.name = "termipulse-droid"
 
 include(":app")

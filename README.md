@@ -1,11 +1,11 @@
-# TermiPulse SSH Terminal
+# termipulse-droid
 
 [![Android](https://img.shields.io/badge/Platform-Android-green.svg)](https://developer.android.com)
 [![Kotlin](https://img.shields.io/badge/Language-Kotlin-purple.svg)](https://kotlinlang.org)
 [![Jetpack Compose](https://img.shields.io/badge/UI-Jetpack%20Compose-blue.svg)](https://developer.android.com/jetpack/compose)
 [![Material 3](https://img.shields.io/badge/Design-Material%203-7B1FA2.svg)](https://m3.material.io)
 
-**TermiPulse** is a feature-packed, modern Android SSH client and terminal emulator built with Kotlin, Jetpack Compose, and Material Design 3. Designed for developers, sysadmins, and DevOps engineers, TermiPulse provides powerful remote session management, quick terminal commands, and a local sandbox shell right from your mobile device.
+**termipulse-droid** is a feature-packed, modern Android SSH client and terminal emulator built with Kotlin, Jetpack Compose, and Material Design 3. Designed for developers, sysadmins, and DevOps engineers, termipulse-droid provides powerful remote session management, quick terminal commands, and a local sandbox shell right from your mobile device.
 
 ---
 
@@ -47,8 +47,8 @@
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/juniormichieletto/termipulse-ssh-terminal.git
-   cd termipulse-ssh-terminal
+   git clone https://github.com/juniormichieletto/termipulse-droid.git
+   cd termipulse-droid
    ```
 
 2. **Open in Android Studio**:

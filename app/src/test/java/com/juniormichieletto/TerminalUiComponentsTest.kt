@@ -86,16 +86,16 @@ class TerminalUiComponentsTest {
             }
         }
 
-        composeTestRule.onNodeWithText("CTRL").performClick()
+        composeTestRule.onNodeWithText("Ctrl").performClick()
         assertEquals("CTRL", clickedKey)
 
-        composeTestRule.onNodeWithText("ALT").performClick()
+        composeTestRule.onNodeWithText("Alt").performClick()
         assertEquals("ALT", clickedKey)
 
-        composeTestRule.onNodeWithText("TAB").performClick()
+        composeTestRule.onNodeWithText("Tab").performClick()
         assertEquals("Tab", clickedKey)
 
-        composeTestRule.onNodeWithText("ESC").performClick()
+        composeTestRule.onNodeWithText("Esc").performClick()
         assertEquals("Esc", clickedKey)
     }
 
@@ -104,7 +104,7 @@ class TerminalUiComponentsTest {
         val tab1 = TerminalTab(id = "1", title = "Tab 1", hostLabel = "localhost", username = "user", host = "127.0.0.1")
         val tab2 = TerminalTab(id = "2", title = "Tab 2", hostLabel = "server", username = "root", host = "10.0.0.1")
 
-        var selectedIndex = 0
+        val selectedIndex = androidx.compose.runtime.mutableStateOf(0)
         var closedIndex = -1
         var addTabClicked = false
 
@@ -112,8 +112,8 @@ class TerminalUiComponentsTest {
             MyApplicationTheme {
                 TerminalTabBar(
                     tabs = listOf(tab1, tab2),
-                    activeTabIndex = selectedIndex,
-                    onTabSelected = { selectedIndex = it },
+                    activeTabIndex = selectedIndex.value,
+                    onTabSelected = { selectedIndex.value = it },
                     onTabClosed = { closedIndex = it },
                     onAddTabClick = { addTabClicked = true }
                 )
@@ -124,7 +124,8 @@ class TerminalUiComponentsTest {
         composeTestRule.onNodeWithText("Tab 2").assertIsDisplayed()
 
         composeTestRule.onNodeWithText("Tab 2").performClick()
-        assertEquals(1, selectedIndex)
+        composeTestRule.waitForIdle()
+        assertEquals(1, selectedIndex.value)
 
         composeTestRule.onNodeWithTag("add_tab_button").performClick()
         assertTrue(addTabClicked)
@@ -196,7 +197,7 @@ class TerminalUiComponentsTest {
         }
 
         composeTestRule.onNodeWithText("Server A").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Connect").performClick()
+        composeTestRule.onNodeWithText("Server A").performClick()
         assertEquals(profiles[0], selectedProfile)
     }
 
@@ -223,7 +224,7 @@ class TerminalUiComponentsTest {
         }
 
         composeTestRule.onNodeWithText("System Uptime").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Execute").performClick()
+        composeTestRule.onNodeWithContentDescription("Run Command").performClick()
         assertEquals(snippets[0], executedSnippet)
     }
 }

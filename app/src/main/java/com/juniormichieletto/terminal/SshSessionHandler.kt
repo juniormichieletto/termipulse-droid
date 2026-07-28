@@ -30,7 +30,8 @@ sealed class SessionEvent {
 class SshSessionHandler(
     val tabId: String,
     val profile: SshProfile,
-    private val scope: CoroutineScope
+    private val scope: CoroutineScope,
+    private val ioDispatcher: kotlinx.coroutines.CoroutineDispatcher = Dispatchers.IO
 ) {
     private val _events = MutableSharedFlow<SessionEvent>(replay = 50)
     val events: SharedFlow<SessionEvent> = _events.asSharedFlow()
@@ -53,7 +54,7 @@ class SshSessionHandler(
         private set
 
     fun connect() {
-        scope.launch(Dispatchers.IO) {
+        scope.launch(ioDispatcher) {
             _events.emit(SessionEvent.StatusChanged(false, "Connecting to ${profile.host}:${profile.port}...", false))
 
             if (profile.isSandbox) {
@@ -108,7 +109,7 @@ class SshSessionHandler(
     }
 
     private fun startSshReadLoop() {
-        readJob = scope.launch(Dispatchers.IO) {
+        readJob = scope.launch(ioDispatcher) {
             val buffer = ByteArray(4096)
             val stream = inputStream ?: return@launch
 
@@ -136,7 +137,7 @@ class SshSessionHandler(
     }
 
     fun sendCommand(command: String) {
-        scope.launch(Dispatchers.IO) {
+        scope.launch(ioDispatcher) {
             val trimmed = command.trim()
             val promptText = "\u001B[32m${profile.username}@${profile.host}\u001B[0m:\u001B[34m$currentDir\u001B[0m$ $trimmed"
             _events.emit(SessionEvent.OutputReceived(promptText, isInput = true))
@@ -349,11 +350,11 @@ no changes added to commit (use "git add" and/or "git commit -a")
         }
 
         isLongJobRunning = true
-        scope.launch {
+        scope.launch(ioDispatcher) {
             _events.emit(SessionEvent.StatusChanged(true, "Job Running ($jobType)", true))
             _events.emit(SessionEvent.OutputReceived("\r\n[1;32m[STARTING LONG JOB: $jobType][0m Session will persist in Background Foreground Service..."))
 
-            longJob = scope.launch(Dispatchers.IO) {
+            longJob = scope.launch(ioDispatcher) {
                 val totalSteps = 20
                 for (step in 1..totalSteps) {
                     if (!isActive) break
@@ -376,7 +377,7 @@ no changes added to commit (use "git add" and/or "git commit -a")
     }
 
     fun sendCtrlC() {
-        scope.launch {
+        scope.launch(ioDispatcher) {
             if (isLongJobRunning) {
                 longJob?.cancel()
                 isLongJobRunning = false
@@ -396,7 +397,7 @@ no changes added to commit (use "git add" and/or "git commit -a")
         readJob?.cancel()
         longJob?.cancel()
 
-        scope.launch(Dispatchers.IO) {
+        scope.launch(ioDispatcher) {
             try {
                 channelShell?.disconnect()
                 jschSession?.disconnect()

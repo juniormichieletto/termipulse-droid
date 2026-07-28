@@ -91,7 +91,7 @@ fun MainTerminalScreen(
 
                         Column {
                             Text(
-                                text = "TermiPulse",
+                                text = "termipulse-droid",
                                 color = TerminalTextPrimary,
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,

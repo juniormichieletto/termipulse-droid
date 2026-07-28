@@ -132,11 +132,11 @@ private fun TerminalTabItem(
 
     Row(
         modifier = Modifier
+            .testTag("tab_item_${tab.id}")
             .background(backgroundColor, RoundedCornerShape(8.dp))
             .border(1.dp, borderColor, RoundedCornerShape(8.dp))
             .clickable(onClick = onClick)
-            .padding(horizontal = 10.dp, vertical = 6.dp)
-            .testTag("tab_item_${tab.id}"),
+            .padding(horizontal = 10.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Connection status indicator
@@ -170,7 +170,8 @@ private fun TerminalTabItem(
             fontSize = 12.sp,
             fontFamily = FontFamily.Monospace,
             fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal,
-            maxLines = 1
+            maxLines = 1,
+            modifier = Modifier.clickable(onClick = onClick)
         )
 
         Spacer(modifier = Modifier.width(8.dp))

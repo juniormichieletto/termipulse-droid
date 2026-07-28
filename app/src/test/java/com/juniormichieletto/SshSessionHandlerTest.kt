@@ -3,29 +3,27 @@ package com.juniormichieletto
 import com.juniormichieletto.data.SshProfile
 import com.juniormichieletto.terminal.SessionEvent
 import com.juniormichieletto.terminal.SshSessionHandler
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.take
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import java.util.concurrent.CopyOnWriteArrayList
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34])
 class SshSessionHandlerTest {
 
-    private val testDispatcher = UnconfinedTestDispatcher()
+    private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)
 
     private val sandboxProfile = SshProfile(
@@ -43,15 +41,16 @@ class SshSessionHandlerTest {
 
     @Test
     fun testConnectSandboxEmitsBannerAndPrompt() = testScope.runTest {
-        val handler = SshSessionHandler("tab-1", sandboxProfile, this)
+        val handler = SshSessionHandler("tab-1", sandboxProfile, this, testDispatcher)
 
-        val events = mutableListOf<SessionEvent>()
-        val job = launch(testDispatcher) {
+        val events = CopyOnWriteArrayList<SessionEvent>()
+        val job = launch {
             handler.events.collect { events.add(it) }
         }
 
         handler.connect()
-        advanceTimeBy(500)
+        advanceTimeBy(1000)
+        advanceUntilIdle()
 
         assertTrue(handler.isConnected)
         assertTrue(events.isNotEmpty())
@@ -59,21 +58,24 @@ class SshSessionHandlerTest {
         assertTrue(events.any { it is SessionEvent.OutputReceived && it.text.contains("TermiPulse Local Terminal Sandbox") })
 
         handler.disconnect()
+        advanceTimeBy(500)
+        advanceUntilIdle()
         assertFalse(handler.isConnected)
         job.cancel()
     }
 
     @Test
     fun testSandboxCommands() = testScope.runTest {
-        val handler = SshSessionHandler("tab-1", sandboxProfile, this)
+        val handler = SshSessionHandler("tab-1", sandboxProfile, this, testDispatcher)
 
-        val events = mutableListOf<SessionEvent>()
-        val job = launch(testDispatcher) {
+        val events = CopyOnWriteArrayList<SessionEvent>()
+        val job = launch {
             handler.events.collect { events.add(it) }
         }
 
         handler.connect()
-        advanceTimeBy(400)
+        advanceTimeBy(1000)
+        advanceUntilIdle()
         events.clear()
 
         // Test commands
@@ -85,7 +87,8 @@ class SshSessionHandlerTest {
 
         for (cmd in commands) {
             handler.sendCommand(cmd)
-            advanceTimeBy(100)
+            advanceTimeBy(200)
+            advanceUntilIdle()
         }
 
         assertTrue(events.isNotEmpty())
@@ -98,26 +101,29 @@ class SshSessionHandlerTest {
 
     @Test
     fun testLongJobAndCancelJob() = testScope.runTest {
-        val handler = SshSessionHandler("tab-1", sandboxProfile, this)
+        val handler = SshSessionHandler("tab-1", sandboxProfile, this, testDispatcher)
 
-        val events = mutableListOf<SessionEvent>()
-        val job = launch(testDispatcher) {
+        val events = CopyOnWriteArrayList<SessionEvent>()
+        val job = launch {
             handler.events.collect { events.add(it) }
         }
 
         handler.connect()
-        advanceTimeBy(400)
+        advanceTimeBy(1000)
+        testScheduler.runCurrent()
         events.clear()
 
         // Start long job
         handler.sendCommand("stress-test")
-        advanceTimeBy(200)
+        advanceTimeBy(100)
+        testScheduler.runCurrent()
 
         assertTrue(handler.isLongJobRunning)
 
         // Cancel job
         handler.sendCommand("cancel-job")
-        advanceTimeBy(200)
+        advanceTimeBy(100)
+        testScheduler.runCurrent()
 
         assertFalse(handler.isLongJobRunning)
         assertTrue(events.any { it is SessionEvent.OutputReceived && it.text.contains("JOB CANCELLED") })
@@ -127,23 +133,26 @@ class SshSessionHandlerTest {
 
     @Test
     fun testSendCtrlC() = testScope.runTest {
-        val handler = SshSessionHandler("tab-1", sandboxProfile, this)
+        val handler = SshSessionHandler("tab-1", sandboxProfile, this, testDispatcher)
 
-        val events = mutableListOf<SessionEvent>()
-        val job = launch(testDispatcher) {
+        val events = CopyOnWriteArrayList<SessionEvent>()
+        val job = launch {
             handler.events.collect { events.add(it) }
         }
 
         handler.connect()
-        advanceTimeBy(400)
+        advanceTimeBy(1000)
+        testScheduler.runCurrent()
         events.clear()
 
         handler.sendCommand("build-job")
-        advanceTimeBy(200)
+        advanceTimeBy(100)
+        testScheduler.runCurrent()
         assertTrue(handler.isLongJobRunning)
 
         handler.sendCtrlC()
-        advanceTimeBy(200)
+        advanceTimeBy(100)
+        testScheduler.runCurrent()
         assertFalse(handler.isLongJobRunning)
         assertTrue(events.any { it is SessionEvent.OutputReceived && it.text.contains("SIGINT") })
 
