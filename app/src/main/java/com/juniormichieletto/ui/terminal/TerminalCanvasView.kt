@@ -179,6 +179,7 @@ fun TerminalCanvasView(
                     key = { it.id }
                 ) { line ->
                     val annotatedString = AnsiParser.parseAnsiToAnnotatedString(line.rawText)
+                    @Suppress("DEPRECATION")
                     ClickableText(
                         text = annotatedString,
                         style = TextStyle(
