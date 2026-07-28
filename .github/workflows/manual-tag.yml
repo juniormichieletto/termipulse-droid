@@ -3,9 +3,18 @@ name: Create Tag Manually
 on:
   workflow_dispatch:
     inputs:
-      tag_name:
-        description: 'Tag name to create (e.g. v1.0.0)'
+      increment_type:
+        description: 'Version increment type (if custom_tag is empty)'
         required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+      custom_tag:
+        description: 'Custom tag name override (e.g. v1.0.0). Leave empty to auto-increment.'
+        required: false
         type: string
       message:
         description: 'Tag annotation message'
@@ -26,9 +35,57 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Determine Next Tag
+        id: get_tag
+        run: |
+          CUSTOM_TAG="${{ inputs.custom_tag }}"
+          INCREMENT_TYPE="${{ inputs.increment_type }}"
+
+          if [ -n "$CUSTOM_TAG" ]; then
+            NEW_TAG="$CUSTOM_TAG"
+            echo "Using custom tag: $NEW_TAG"
+          else
+            git fetch --tags --force
+            LATEST_TAG=$(git tag -l "v[0-9]*" "[0-9]*" | sort -V | tail -n 1)
+
+            if [ -z "$LATEST_TAG" ]; then
+              echo "No existing tags found. Creating initial tag v1.0.0"
+              NEW_TAG="v1.0.0"
+            else
+              echo "Latest tag found: $LATEST_TAG"
+              VERSION="${LATEST_TAG#v}"
+              
+              IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
+              MAJOR=${MAJOR:-0}
+              MINOR=${MINOR:-0}
+              PATCH=${PATCH:-0}
+              PATCH=$(echo "$PATCH" | sed 's/-.*//')
+
+              case "$INCREMENT_TYPE" in
+                major)
+                  MAJOR=$((MAJOR + 1))
+                  MINOR=0
+                  PATCH=0
+                  ;;
+                minor)
+                  MINOR=$((MINOR + 1))
+                  PATCH=0
+                  ;;
+                patch|*)
+                  PATCH=$((PATCH + 1))
+                  ;;
+              esac
+
+              NEW_TAG="v${MAJOR}.${MINOR}.${PATCH}"
+            fi
+          fi
+
+          echo "TAG_NAME=$NEW_TAG" >> $GITHUB_ENV
+          echo "Determined tag: $NEW_TAG"
+
       - name: Create and Push Tag
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag -a "${{ inputs.tag_name }}" -m "${{ inputs.message }}"
-          git push origin "${{ inputs.tag_name }}"
+          git tag -a "$TAG_NAME" -m "${{ inputs.message }}"
+          git push origin "$TAG_NAME"
