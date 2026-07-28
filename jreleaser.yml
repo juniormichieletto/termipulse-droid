@@ -1,0 +1,38 @@
+# JReleaser Configuration
+# https://jreleaser.org/guide/latest/index.html
+
+project:
+  name: termipulse-droid
+  version: 1.0.0
+  description: "Access my SSH things - High-performance Android SSH Terminal client"
+  longDescription: "TermiPulse is a fast, multi-tab SSH terminal emulator for Android with custom keybars, command snippets, profiles, and ANSI color support."
+  authors:
+    - Junior Michieletto
+  license: Apache-2.0
+  links:
+    homepage: https://github.com/juniormichieletto/termipulse-droid
+    bugTracker: https://github.com/juniormichieletto/termipulse-droid/issues
+  stereotype: MOBILE
+
+release:
+  github:
+    owner: juniormichieletto
+    name: termipulse-droid
+    overwrite: true
+    draft: false
+    prerelease: false
+    changelog:
+      formatted: ALWAYS
+      preset: conventional
+      format: '- {{commitShortHash}} {{commitTitle}}'
+      contributors:
+        enabled: true
+
+distributions:
+  termipulse-droid:
+    type: SINGLE_JAR
+    artifacts:
+      - path: app/build/outputs/apk/release/app-release-unsigned.apk
+        transform: 'termipulse-droid-{{projectVersion}}-release.apk'
+      - path: app/build/outputs/apk/debug/app-debug.apk
+        transform: 'termipulse-droid-{{projectVersion}}-debug.apk'
