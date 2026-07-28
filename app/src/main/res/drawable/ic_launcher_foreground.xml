@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Window Frame -->
+    <path
+        android:fillColor="#1E293B"
+        android:pathData="M24,28h60c3.31,0 6,2.69 6,6v40c0,3.31 -2.69,6 -6,6H24c-3.31,0 -6,-2.69 -6,-6V34c0,-3.31 2.69,-6 6,-6z" />
+    <!-- Window Title Bar -->
+    <path
+        android:fillColor="#334155"
+        android:pathData="M24,28h60c3.31,0 6,2.69 6,6v10H18V34c0,-3.31 2.69,-6 6,-6z" />
+    <!-- Window Buttons -->
+    <path
+        android:fillColor="#EF4444"
+        android:pathData="M26,33m-2,0a2,2 0 1,1 4,0a2,2 0 1,1 -4,0" />
+    <path
+        android:fillColor="#F59E0B"
+        android:pathData="M33,33m-2,0a2,2 0 1,1 4,0a2,2 0 1,1 -4,0" />
+    <path
+        android:fillColor="#10B981"
+        android:pathData="M40,33m-2,0a2,2 0 1,1 4,0a2,2 0 1,1 -4,0" />
+    <!-- Terminal Prompt '>' -->
+    <path
+        android:fillColor="#00E676"
+        android:pathData="M28,48l8,6 -8,6 -2.5,-2.5 4.6,-3.5 -4.6,-3.5z" />
+    <!-- Cursor '_' -->
+    <path
+        android:fillColor="#00E5FF"
+        android:pathData="M40,58h12v3H40z" />
+    <!-- Secondary Code Line -->
+    <path
+        android:fillColor="#94A3B8"
+        android:pathData="M28,66h32v2H28z" />
+</vector>
